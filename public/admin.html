@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+
+<body class="admin">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">QuoteApp</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="submit.html">Submit</a></li>
+                <li><a href="#" id="adminLink">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="admin-login-section">
+        <form id="adminLoginForm" class="login-form">
+            <h2>Admin Login</h2>
+            <input type="text" id="adminUsername" placeholder="Username" required />
+            <input type="password" id="adminPassword" placeholder="Password" required />
+            <button type="submit">Login</button>
+            <div id="loginMessage" style="color: red; text-align: center;"></div>
+        </form>
+    </div>
+
+    <div id="admin-approval-section" style="display: none;">
+        <h2 style="text-align: center;">Pending Quotes</h2>
+        <div id="admin-quotes"></div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById("adminLoginForm");
+        const loginSection = document.getElementById("admin-login-section");
+        const approvalSection = document.getElementById("admin-approval-section");
+
+        loginForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById("adminUsername").value;
+            const password = document.getElementById("adminPassword").value;
+
+            try {
+                const res = await fetch("http://localhost:8000/admin-login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    loginSection.style.display = "none";
+                    approvalSection.style.display = "block";
+                    loadPendingQuotes();
+                } else {
+                    const result = await res.json();
+                    document.getElementById("loginMessage").textContent = result.message;
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById("loginMessage").textContent = "Server error. Please check connection.";
+            }
+        });
+
+        async function loadPendingQuotes() {
+            const res = await fetch("http://localhost:8000/admin/quotes");
+            const quotes = await res.json();
+            const container = document.getElementById("admin-quotes");
+
+            container.innerHTML = quotes.map(q => `
+                <div>
+                    <p>${q.text} — ${q.author}</p>
+                    <button onclick="approveQuote('${q._id}')">Approve</button>
+                    <button onclick="deleteQuote('${q._id}')">Delete</button>
+                </div>
+            `).join("");
+        }
+
+        async function approveQuote(id) {
+            await fetch(`http://localhost:8000/admin/approve/${id}`, { method: "PUT" });
+            loadPendingQuotes();
+        }
+
+        async function deleteQuote(id) {
+            await fetch(`http://localhost:8000/admin/delete/${id}`, { method: "DELETE" });
+            loadPendingQuotes();
+        }
+    </script>
+
+</body>
+
+</html>

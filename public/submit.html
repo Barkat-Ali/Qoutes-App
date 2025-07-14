@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit a Quote</title>
+    <link rel="stylesheet" href="./css/styles.css">
+
+</head>
+
+<body class="submit">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">QuoteApp</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="submit.html">Submit</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Submit a Quote</h1>
+
+        <form id="quoteForm">
+            <input type="text" id="quoteText" placeholder="Enter your quote" required>
+            <input type="text" id="quoteAuthor" placeholder="Author name" required>
+            <button type="submit">Submit</button>
+        </form>
+
+        <p id="formMessage"></p>
+    </div>
+
+    <script>
+        const form = document.getElementById("quoteForm");
+        if (form) {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const text = document.getElementById("quoteText").value;
+                const author = document.getElementById("quoteAuthor").value;
+
+                const res = await fetch("http://localhost:8000/submit", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ text, author }),
+                });
+
+                const result = await res.json();
+                alert(result.message);
+                form.reset();
+            });
+        }
+
+    </script>
+
+</body>
+
+</html>

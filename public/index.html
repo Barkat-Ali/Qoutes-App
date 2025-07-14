@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Approved Quotes</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    
+</head>
+
+<body class="home">
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">QuoteApp</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="submit.html">Submit</a></li>
+                <li><a href="admin.html">Admin</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Approved Quotes</h1>
+        <div id="quotes-list"></div>
+    </div>
+
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            fetch("http://localhost:8000/quotes")
+                .then(res => {
+                    if (!res.ok) throw new Error("Failed to fetch approved quotes.");
+                    return res.json();
+                })
+                .then(data => {
+                    const list = data.map(q => `
+                        <div class="quote-card">
+                            <div class="quote-text">"${q.text}"</div>
+                            <div class="quote-author">— ${q.author}</div>
+                        </div>
+                    `).join("");
+
+                    document.getElementById("quotes-list").innerHTML = list || "<p>No approved quotes yet.</p>";
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("quotes-list").innerHTML = "<p>Unable to load quotes. Please try again later.</p>";
+                });
+        });
+    </script>
+
+</body>
+
+</html>
